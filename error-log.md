@@ -15,3 +15,9 @@
 **Reason:** Step 0 precheck (`curl https://www.google.com`) failed all 10 attempts again. Verified via `$HTTPS_PROXY/__agentproxy/status` that the egress proxy returns 403 on CONNECT for www.google.com (`connect_rejected` — policy denial). Connectivity is present; the host is simply not on the egress allowlist.
 **Action:** Did NOT abort. Research proceeded via WebSearch (18 queries, 0 retries needed) and the report for 2026-08-12 was generated and committed. Note that finance.yahoo.com, www.cnbc.com and www.thestreet.com are also blocked for direct WebFetch, so index levels were sourced through WebSearch instead.
 **Fix still needed:** Step 0 should probe a permitted endpoint (or use a WebSearch call) instead of google.com. This is the third occurrence (see 2026-07-20 and 2026-08-10 entries); the 2026-07-20 run aborted unnecessarily because of it.
+
+## 2026-11-18 13:17:35 — Connectivity Precheck False Negative (non-blocking, recurring)
+**Routine:** Daily Market Report
+**Reason:** Step 0 precheck (`curl https://www.google.com`) failed again. Confirmed via `$HTTPS_PROXY/__agentproxy/status`: the egress proxy logged `connect_rejected — gateway answered 403 to CONNECT` for `www.google.com:443`. Policy denial, not loss of connectivity.
+**Action:** Did NOT abort. Killed the retry loop early and verified reachability with a live WebSearch call instead. Research proceeded normally (17 queries, 0 retries needed); the report for 2026-11-18 was generated and committed. Direct WebFetch to stockanalysis.com also failed DNS resolution (not on the egress allowlist), so all valuation metrics were sourced via WebSearch and flagged in-report where sources conflicted.
+**Fix still needed:** Step 0 should probe a permitted endpoint or simply rely on a WebSearch call. This remains unfixed since 2026-07-20 and continues to burn ~2 minutes of retry time on every healthy run.
